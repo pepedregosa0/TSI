@@ -1,20 +1,12 @@
 package tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE;
 
+import static tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.Constantes.*;
 import core.game.StateObservation;
 import core.game.Observation;
 import java.util.ArrayList;
 import core.vgdl.VGDLRegistry;
 
 public class Mapa {
-    private static final byte SUELO = 0;
-    private static final byte AGUA = 1;
-    private static final byte PARED = 2;
-    private static final byte PUERTA = 3;
-    private static final byte CATNORTH = 1;
-    private static final byte CATSOUTH = 2;
-    private static final byte CATEAST = 3;
-    private static final byte CATWEST = 4;
-
     public int ancho;
     public int alto;
 
@@ -68,7 +60,31 @@ public class Mapa {
             for (int j = 0; j < immovablePositions[i].size(); j++) {
                 int x = (int)(immovablePositions[i].get(j).position.x / stateObs.getBlockSize());
                 int y = (int)(immovablePositions[i].get(j).position.y / stateObs.getBlockSize());
-                System.out.println("Objeto immovable en (" + x + ", " + y + "): " + immovablePositions[i].get(j).itype);
+                int itype = immovablePositions[i].get(j).itype;
+                // System.out.println("Objeto immovable en (" + x + ", " + y + "): " + itype);
+                if (itype == idWall) {
+                    grid[x][y] = PARED;
+                } else if (itype == idWater) {
+                    grid[x][y] = AGUA;
+                } else if (itype == idLocked) {
+                    grid[x][y] = PUERTA;
+                } else if (itype == idUnlocked) {
+                    grid[x][y] = PUERTA_ABIERTA;
+                } else if (itype == idCoins) {
+                    mapaMonedas[x][y] = true;
+                } else if (itype == idKey) {
+                    mapaLlaves[x][y] = true;
+                } else if (itype == idCatNorth) {
+                    mapaCatapultas[x][y] = CATNORTH;
+                } else if (itype == idCatSouth) {
+                    mapaCatapultas[x][y] = CATSOUTH;
+                } else if (itype == idCatEast) {
+                    mapaCatapultas[x][y] = CATEAST;
+                } else if (itype == idCatWest) {
+                    mapaCatapultas[x][y] = CATWEST;
+                } else {
+                    grid[x][y] = SUELO; // Si no es ningún objeto conocido, lo consideramos suelo.
+                }
             } 
         }
     }
