@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import core.vgdl.VGDLRegistry;
 
 public class Mapa {
+    private static final byte SUELO = 0;
     private static final byte AGUA = 1;
     private static final byte PARED = 2;
     private static final byte PUERTA = 3;
@@ -43,38 +44,32 @@ public class Mapa {
         // Recursos
         int idCoins = VGDLRegistry.GetInstance().getRegisteredSpriteValue("coins");
         int idKey = VGDLRegistry.GetInstance().getRegisteredSpriteValue("key");
-
         // Catapultas
         int idCatNorth = VGDLRegistry.GetInstance().getRegisteredSpriteValue("northfacing");
         int idCatSouth = VGDLRegistry.GetInstance().getRegisteredSpriteValue("southfacing");
         int idCatEast = VGDLRegistry.GetInstance().getRegisteredSpriteValue("eastfacing");
         int idCatWest = VGDLRegistry.GetInstance().getRegisteredSpriteValue("westfacing");
-
-        for (int x = 0; x < ancho; x++) {
-            for (int y = 0; y < alto; y++) {
-                for (Observation obs: obsGrid[x][y]) {
-                    if (obs.itype == idWall)
-                        grid[x][y] = PARED;
-                    else if (obs.itype == idWater)
-                        grid[x][y] = AGUA;
-                    else if (obs.itype == idLocked)
-                        grid[x][y] = PUERTA;
-                    else if (obs.itype == idUnlocked)
-                        grid[x][y] = PUERTA;
-                    else if (obs.itype == idCoins)
-                        mapaMonedas[x][y] = true;
-                    else if (obs.itype == idKey)
-                        mapaLlaves[x][y] = true;
-                    else if (obs.itype == idCatNorth)
-                        mapaCatapultas[x][y] = CATNORTH;
-                    else if (obs.itype == idCatSouth)
-                        mapaCatapultas[x][y] = CATSOUTH;
-                    else if (obs.itype == idCatEast)
-                        mapaCatapultas[x][y] = CATEAST;
-                    else if (obs.itype == idCatWest)
-                        mapaCatapultas[x][y] = CATWEST;
-                }
-            }
+        // Conseguir la info de las casillas
+        ArrayList<Observation>[] immovablePositions = stateObs.getImmovablePositions();
+        // Tipo de casillas
+        System.out.println("Ancho: " + ancho + " Alto: " + alto);
+        System.out.println("ID Wall: " + idWall);
+        System.out.println("ID Water: " + idWater);
+        System.out.println("ID Locked: " + idLocked);
+        System.out.println("ID Unlocked: " + idUnlocked);
+        System.out.println("ID Coins: " + idCoins);
+        System.out.println("ID Key: " + idKey);
+        System.out.println("ID CatNorth: " + idCatNorth);
+        System.out.println("ID CatSouth: " + idCatSouth);
+        System.out.println("ID CatEast: " + idCatEast);
+        System.out.println("ID CatWest: " + idCatWest);
+        // Imprimir las posiciones de los objetos immovables
+        for (int i = 0; i < immovablePositions.length; i++){
+            for (int j = 0; j < immovablePositions[i].size(); j++) {
+                int x = (int)(immovablePositions[i].get(j).position.x / stateObs.getBlockSize());
+                int y = (int)(immovablePositions[i].get(j).position.y / stateObs.getBlockSize());
+                System.out.println("Objeto immovable en (" + x + ", " + y + "): " + immovablePositions[i].get(j).itype);
+            } 
         }
     }
 
