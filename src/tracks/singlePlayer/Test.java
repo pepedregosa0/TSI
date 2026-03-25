@@ -54,7 +54,7 @@ public class Test {
 
 		// 2. This plays a game in a level by the controller.
 //		ArcadeMachine.runOneGame(game, level1, visuals, sampleRHEAController, recordActionsFile, seed, 0);
-		ArcadeMachine.runOneGame(game, level1, visuals, myDFSController, recordActionsFile, seed, 0);
+		ArcadeMachine.runOneGame(game, level1, visuals, myDFSController, null, seed, 0);
 
 
 		// 3. This replays a game from an action file previously recorded

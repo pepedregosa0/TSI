@@ -24,6 +24,15 @@ public class Mapa {
         mapaMonedas = new boolean[ancho][alto];
         mapaLlaves = new boolean[ancho][alto];
         mapaCatapultas = new byte[ancho][alto];
+
+        for (int i = 0; i < ancho; i++) {
+            for (int j = 0; j < alto; j++) {
+                grid[i][j] = SUELO;
+                mapaMonedas[i][j] = false;
+                mapaLlaves[i][j] = false;
+                mapaCatapultas[i][j] = 0;
+            }
+        }
         
         // Obstáculos
         int idWall = VGDLRegistry.GetInstance().getRegisteredSpriteValue("wall");
@@ -61,7 +70,7 @@ public class Mapa {
                 int x = (int)(immovablePositions[i].get(j).position.x / stateObs.getBlockSize());
                 int y = (int)(immovablePositions[i].get(j).position.y / stateObs.getBlockSize());
                 int itype = immovablePositions[i].get(j).itype;
-                // System.out.println("Objeto immovable en (" + x + ", " + y + "): " + itype);
+                System.out.println("Objeto immovable en (" + x + ", " + y + "): " + itype);
                 if (itype == idWall) {
                     grid[x][y] = PARED;
                 } else if (itype == idWater) {
@@ -70,10 +79,6 @@ public class Mapa {
                     grid[x][y] = PUERTA;
                 } else if (itype == idUnlocked) {
                     grid[x][y] = PUERTA_ABIERTA;
-                } else if (itype == idCoins) {
-                    mapaMonedas[x][y] = true;
-                } else if (itype == idKey) {
-                    mapaLlaves[x][y] = true;
                 } else if (itype == idCatNorth) {
                     mapaCatapultas[x][y] = CATNORTH;
                 } else if (itype == idCatSouth) {
@@ -82,10 +87,37 @@ public class Mapa {
                     mapaCatapultas[x][y] = CATEAST;
                 } else if (itype == idCatWest) {
                     mapaCatapultas[x][y] = CATWEST;
-                } else {
-                    grid[x][y] = SUELO; // Si no es ningún objeto conocido, lo consideramos suelo.
                 }
             } 
+        }
+
+        System.out.println("Mapa generado:");
+        for (int i = 0; i < ancho; i++) {
+            for (int j = 0; j < alto; j++) {
+                System.out.print(grid[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println("Mapa de monedas:");
+        for (int i = 0; i < ancho; i++) {
+            for (int j = 0; j < alto; j++) {
+                System.out.print(mapaMonedas[i][j] ? "1 " : "0 ");
+            }
+            System.out.println();
+        }
+        System.out.println("Mapa de llaves:");
+        for (int i = 0; i < ancho; i++) {
+            for (int j = 0; j < alto; j++) {
+                System.out.print(mapaLlaves[i][j] ? "1 " : "0 ");
+            } 
+            System.out.println();
+        }
+        System.out.println("Mapa de catapultas:");
+        for (int i = 0; i < ancho; i++) {
+            for (int j = 0; j < alto; j++) {
+                System.out.print(mapaCatapultas[i][j] + " ");
+            }
+            System.out.println();
         }
     }
 
