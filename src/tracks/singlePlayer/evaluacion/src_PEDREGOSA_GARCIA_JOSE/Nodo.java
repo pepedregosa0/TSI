@@ -49,7 +49,7 @@ public class Nodo {
         this.catapultas2 = padre.catapultas2;
     }
 
-    /// TODO ESTA MAL
+    // TODO probar que funciona correctamente
     public ArrayList<Nodo> expandir(Mapa mapa) {
         ArrayList<Nodo> hijos = new ArrayList<>();
         if (estaMuerto(mapa))
@@ -118,25 +118,29 @@ public class Nodo {
         for (int i = 0; i < 4; i++) {
             short newX = (short) (x + dx[i]);
             short newY = (short) (y + dy[i]);
-            if (newX >= 0 && newX < mapa.xmax && newY >= 0 && newY < mapa.ymax) {
-                if ((mapa.grid[newY][newX] == PARED && isVolando() == 0) ||
-                    (mapa.grid[newY][newX] == AGUA && isVolando() == 0) || 
-                    (mapa.grid[newY][newX] == PUERTA && !hasLlave())) {
-                    continue; // No se puede pasar por paredes ni por agua si no se está volando
-                }
-                else {
-                    Nodo hijo = new Nodo(newX, newY, this);
-                    hijo.accionPrecedente = acciones[i];
-                    if (mapa.mapaMonedas[newY][newX] && getMoneda() < 5) {
-                        int idMoneda = mapa.idMonedas[newY][newX];
-                        if (!hijo.isMonedaRecogida(idMoneda) && hijo.masMoneda())
-                            hijo.marcarMonedaRecogida(idMoneda);
-                    }
-                    if (mapa.mapaLlaves[newY][newX] && !hijo.hasLlave())
-                        hijo.setLlave(true);
-                    hijos.add(hijo);
-                }
+            if (outOfBounds(newX, newY, mapa)) continue;
+            if ((mapa.grid[newY][newX] == PARED) ||
+                (mapa.grid[newY][newX] == AGUA) || 
+                (mapa.grid[newY][newX] == PUERTA && !hasLlave())) {
+                continue; // No se puede pasar por paredes ni por agua si no se está volando
             }
+            byte proximaCatapulta = mapa.mapaCatapultas[newY][newX];
+            if (proximaCatapulta != -1 && getMoneda() == 0) {
+                int idCat = mapa.idCatapultas[newY][newX];
+                if (!isCatapultaActivada(idCat))
+                    continue; // No se puede entrar en una casilla con catapulta si no se tienen monedas para usarla
+            }
+            
+            Nodo hijo = new Nodo(newX, newY, this);
+            hijo.accionPrecedente = acciones[i];
+            if (mapa.mapaMonedas[newY][newX] && getMoneda() < 5) {
+                int idMoneda = mapa.idMonedas[newY][newX];
+                if (!hijo.isMonedaRecogida(idMoneda) && hijo.masMoneda())
+                    hijo.marcarMonedaRecogida(idMoneda);
+            }
+            if (mapa.mapaLlaves[newY][newX] && !hijo.hasLlave())
+                hijo.setLlave(true);
+            hijos.add(hijo);
         }
         return hijos;
     }
