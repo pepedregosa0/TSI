@@ -4,6 +4,7 @@ import static tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.Constante
 import tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.Mapa;
 import ontology.Types.ACTIONS;
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class Nodo {
@@ -261,6 +262,32 @@ public class Nodo {
 
     public int getCasilla(Mapa mapa) {
         return mapa.grid[y][x];
+    }
+
+    @Override
+    public String toString() {
+        String nodo = String.format("Nodo(x=%d, y=%d, moneda=%d, llave=%b, volando=%d)", 
+            x, y, getMoneda(), hasLlave(), isVolando());
+        return nodo;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Nodo otro = (Nodo) obj;
+        return this.x == otro.x && 
+               this.y == otro.y &&
+               this.flags == otro.flags &&
+               this.monedas1 == otro.monedas1 &&
+               this.monedas2 == otro.monedas2 &&
+               this.catapultas1 == otro.catapultas1 &&
+               this.catapultas2 == otro.catapultas2;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, flags, monedas1, monedas2, catapultas1, catapultas2);
     }
 
 }

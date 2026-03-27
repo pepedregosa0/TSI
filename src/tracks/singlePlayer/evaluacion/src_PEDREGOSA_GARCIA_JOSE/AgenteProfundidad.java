@@ -19,8 +19,7 @@ public class AgenteProfundidad extends AbstractPlayer {
 
     public Vector2d posicion;
     public Vector2d portal;
-    public Nodo nodoInicial;
-    public Estado estado;
+    public Nodo nodoActual;
 
     public AgenteProfundidad(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
         super();
@@ -37,8 +36,8 @@ public class AgenteProfundidad extends AbstractPlayer {
         posicion.x = Math.floor(posicion.x / blockSize);
         posicion.y = Math.floor(posicion.y / blockSize);
 
-        estado = new Estado(stateObs, new Vector2d(blockSize, blockSize), posicion, portal);
-        nodoInicial = new Nodo((short) posicion.x, (short) posicion.y, 0, false, (byte) 0);
+        // Nodo inicial
+        nodoActual = new Nodo((short) posicion.x, (short) posicion.y, 0, false, (byte) 0);
     }
 
     @Override
