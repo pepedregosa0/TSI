@@ -9,13 +9,14 @@ import java.util.Objects;
 
 public class Nodo {
     private static final short[] dx = {1, 0, -1, 0};
-    private static final short[] dy = {0, 1, 0, -1};
+    private static final short[] dy = {0, -1, 0, 1};
     private static final ACTIONS[] acciones = {ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, ACTIONS.ACTION_DOWN};
 
     public short x;
     public short y;
 
-    ACTIONS accionPrecedente; // Acción que se tomó para llegar a este nodo desde su padre
+    private ACTIONS accionPrecedente; // Acción que se tomó para llegar a este nodo desde su padre
+    private Nodo padre;
     // flags:
     // [0]    [0 0 0]             [0]      [0 0 0]
     // Libre  Direccion de vuelo  Llave    Moneda
@@ -38,6 +39,7 @@ public class Nodo {
         setMoneda(moneda);
         setLlave(llave);
         setVolando(volando);
+        this.padre = null;
     }
 
     public Nodo(short x, short y, Nodo padre) {
@@ -48,6 +50,7 @@ public class Nodo {
         this.monedas2 = padre.monedas2;
         this.catapultas1 = padre.catapultas1;
         this.catapultas2 = padre.catapultas2;
+        this.padre = padre;
     }
 
     // TODO probar que funciona correctamente
@@ -264,10 +267,18 @@ public class Nodo {
         return mapa.grid[y][x];
     }
 
+    public ACTIONS getAccionPadre() {
+        return accionPrecedente;
+    }
+
+    public Nodo getPadre() {
+        return padre;
+    }
+
     @Override
     public String toString() {
-        String nodo = String.format("Nodo(x=%d, y=%d, moneda=%d, llave=%b, volando=%d)", 
-            x, y, getMoneda(), hasLlave(), isVolando());
+        String nodo = String.format("Nodo(x=%d, y=%d, moneda=%d, llave=%b, volando=%d, AccionPadre=%s)", 
+            x, y, getMoneda(), hasLlave(), isVolando(), accionPrecedente);
         return nodo;
     }
 

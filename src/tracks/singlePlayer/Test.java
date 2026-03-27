@@ -33,7 +33,7 @@ public class Test {
 		String[][] games = Utils.readGames(spGamesCollection);
 
 		//Game settings
-		boolean visuals = false;
+		boolean visuals = true;
 		int seed = new Random().nextInt();
 
 		// Game and level to play

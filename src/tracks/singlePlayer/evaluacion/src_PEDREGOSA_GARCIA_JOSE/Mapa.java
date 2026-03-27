@@ -123,7 +123,7 @@ public class Mapa {
             } 
         }
 
-        System.out.println(this);
+        //System.out.println(this);
     }
 
     public Mapa(int ymax, int xmax) {
