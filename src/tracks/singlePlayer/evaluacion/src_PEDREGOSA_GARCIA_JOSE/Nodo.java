@@ -53,7 +53,7 @@ public class Nodo {
         this.padre = padre;
     }
 
-    // TODO probar que funciona correctamente
+    // TODO probar que funciona correctamente spoiler no funciona
     public ArrayList<Nodo> expandir(Mapa mapa) {
         ArrayList<Nodo> hijos = new ArrayList<>();
         if (estaMuerto(mapa))

@@ -58,13 +58,9 @@ public class AgenteProfundidad extends AbstractPlayer {
 
     @Override
     public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
-        // Este método debe encargarse de computar el plan y devolver la siguiente acción
-
-        // Al encontrar el plan se deben fijar TODAS las métricas complementarias correspondientes al algoritmo
         if (plan == null) {
             MetricsProvider.getInstance().setNumAccionesPlan(-1);
 
-            //----------
             HashSet<Nodo> visitados = new HashSet<>();
             Nodo meta = DFSRecursivo(nodoActual, visitados);
             if (meta != null) {
@@ -77,7 +73,6 @@ public class AgenteProfundidad extends AbstractPlayer {
                 plan = new ArrayList<>();
                 plan.add(ACTIONS.ACTION_NIL);
             }
-            //----------
         }
         if (plan.size() > 0) {
             ACTIONS accion = plan.remove(0);
