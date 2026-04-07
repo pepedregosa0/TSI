@@ -31,6 +31,14 @@ public class Nodo {
     public long catapultas1 = 0L;
     public long catapultas2 = 0L;
 
+    /**
+     * Constructor para el nodo raíz.
+     * @param x
+     * @param y
+     * @param moneda
+     * @param llave
+     * @param volando dirección de vuelo (0 para no volando, 1 norte, 2 sur, 3 este, 4 oeste)
+     */
     public Nodo(short x, short y, int moneda, boolean llave, byte volando) {
         this.x = x;
         this.y = y;
@@ -42,6 +50,12 @@ public class Nodo {
         this.padre = null;
     }
 
+    /**
+     * Copia el estado del nodo padre y lo actualiza con la nueva posición (x,y).
+     * @param x
+     * @param y
+     * @param padre
+     */
     public Nodo(short x, short y, Nodo padre) {
         this.x = x;
         this.y = y;
@@ -56,43 +70,44 @@ public class Nodo {
     // TODO probar que funciona correctamente spoiler no funciona
     public ArrayList<Nodo> expandir(Mapa mapa) {
         ArrayList<Nodo> hijos = new ArrayList<>();
-        if (estaMuerto(mapa))
-            return hijos;
         // Movimiento volando
         byte dirVuelo = isVolando();
         if (dirVuelo != 0) {
             Nodo hijo = new Nodo(x, y, this);
             hijo.accionPrecedente = ACTIONS.ACTION_NIL;
 
-            int vx = 0, vy = 0;
-            if (dirVuelo == DIREAST) vx = 1;
-            else if (dirVuelo == DIRNORTH) vy = -1;
-            else if (dirVuelo == DIRWEST) vx = -1;
-            else if (dirVuelo == DIRSOUTH) vy = 1;
+            short newX = (short) (x + dx[dirVuelo - 1]);
+            short newY = (short) (y + dy[dirVuelo - 1]);
 
-            short newX = (short) (x + vx);
-            short newY = (short) (y + vy);
-            if (outOfBounds(newX, newY, mapa) || mapa.grid[newY][newX] == PARED) {
+            // Mirar si nos hemos chocado con una pared o puerta cerrada
+            if (outOfBounds(newX, newY, mapa) || mapa.grid[newY][newX] == PARED ||
+                (mapa.grid[newY][newX] == PUERTA && !hasLlave())) {
                 hijo.setVolando(0);
                 if (!hijo.estaMuerto(mapa))
                     hijos.add(hijo);
                 return hijos;
             }
+
             hijo.x = newX;
             hijo.y = newY;
-
+            
+            // Nos encontramos una catapulta en el camino,
+            // se tiene que activar, cambiando la dirección de vuelo,
+            // accionPrecedente ACTION_NIL y tenemos que hacer ACTION_NIL en el siguiente paso
             int nuevaCatapulta = mapa.mapaCatapultas[newY][newX];
-            if (nuevaCatapulta != -1) {
-                int idCat = mapa.idCatapultas[newY][newX];
-                if (!hijo.isCatapultaActivada(idCat)) {
-                    hijo.setVolandoCat(nuevaCatapulta);
-                    hijo.marcarCatapultaActivada(idCat);
-                }
+            int idNuevaCatapulta = mapa.idCatapultas[newY][newX];
+            if (nuevaCatapulta != -1 && !hijo.isCatapultaActivada(idNuevaCatapulta)) {
+                hijo.setVolandoCat(nuevaCatapulta);
+                hijo.marcarCatapultaActivada(idNuevaCatapulta);
+                hijos.add(hijo);
+                return hijos;
             }
-
+            
+            // Recoger llave
             if (mapa.mapaLlaves[newY][newX] && !hijo.hasLlave())
                 hijo.setLlave(true);
 
+            // Recoger moneda
             if (mapa.mapaMonedas[newY][newX]) {
                 int idMoneda = mapa.idMonedas[newY][newX];
                 if (!hijo.isMonedaRecogida(idMoneda) && hijo.masMoneda())
@@ -128,11 +143,12 @@ public class Nodo {
                 (mapa.grid[newY][newX] == PUERTA && !hasLlave())) {
                 continue; // No se puede pasar por paredes ni por agua si no se está volando
             }
-            byte proximaCatapulta = mapa.mapaCatapultas[newY][newX];
-            if (proximaCatapulta != -1 && getMoneda() == 0) {
-                int idCat = mapa.idCatapultas[newY][newX];
-                if (!isCatapultaActivada(idCat))
-                    continue; // No se puede entrar en una casilla con catapulta si no se tienen monedas para usarla
+            int proximaCatapulta = mapa.mapaCatapultas[newY][newX];
+            int idProximaCatapulta = mapa.idCatapultas[newY][newX];
+            if (proximaCatapulta != -1 &&
+                !isCatapultaActivada(idProximaCatapulta) &&
+                getMoneda() == 0) {
+                continue; // No se puede entrar en una casilla con catapulta si no se tienen monedas para usarla
             }
             
             Nodo hijo = new Nodo(newX, newY, this);
@@ -151,17 +167,31 @@ public class Nodo {
 
     // --- MÉTODOS DE ACCESO A BITS ---
 
+    /**
+     * Devuelve el número de monedas que se tienen actualmente (0-5). Si devuelve 7, 
+     * el nodo está muerto (ha perdido más monedas de las que tenía o ha caído al agua sin estar volando).
+     * @return
+     */
     public int getMoneda() {
         // (00000111) para leer los 3 primeros bits
         return flags & 0x07; 
     }
 
+    /**
+     * Establece el número de monedas (0-5) en el nodo actual.
+     * Si se establece un valor menor que 0, se considera que el nodo está muerto
+     * @param moneda
+     */
     protected void setMoneda(int moneda) {
         // Limpiamos los 3 primeros bits y escribimos el nuevo valor (0-5)
         if (moneda < 0) moneda = 7; // Valor 7 significa muerto (ha perdido mas monedas de las que tenía o ha caido al agua)
         flags = (byte) ((flags & ~0x07) | (moneda & 0x07));
     }
 
+    /**
+     * Suma una moneda al nodo. Devuelve true si se ha podido recoger la moneda
+     * @return
+     */
     public boolean masMoneda() {
         int moneda = getMoneda();
         if (moneda < 5) {
@@ -171,24 +201,42 @@ public class Nodo {
         return false; // No se puede recoger más monedas
     }
 
+    /**
+     * Resta una moneda al nodo. Si el número de monedas llega a 0, el nodo se considera muerto.
+     */
     public void menosMoneda() {
         setMoneda(getMoneda() - 1);
     }
 
+    /**
+     * Devuelve true si se tiene la llave, false si no se tiene
+     * @return
+     */
     public boolean hasLlave() {
         // (00001000 en binario) para leer el 4to bit
         return (flags & 0x08) != 0; 
     }
 
+    /**
+     * Establece el estado de la llave (true si se tiene, false si no)
+     * @param llave
+     */
     public void setLlave(boolean llave) {
         if (llave) flags |= 0x08;      // Enciende el bit
         else       flags &= ~0x08;     // Apaga el bit
     }
 
+    /**
+     * Devuelve 0 si no está volando, o un valor entre 1 y 4 indicando la dirección de vuelo
+     * 1 = norte, 2 = sur, 3 = este, 4 = oeste 
+     */
     public byte isVolando() {
         return (byte) ((flags >> 4) & 0x07); // (01110000) para leer los bits 4-6 
     }
 
+    /**
+     * Establece la dirección de vuelo (0 para no volando, 1 norte, 2 sur, 3 este, 4 oeste)
+     */
     public void setVolando(int direccion) {
         if (direccion < 0 || direccion > 4) {
             direccion = 0; // No volando
@@ -199,6 +247,10 @@ public class Nodo {
         flags = (byte) ((flags & 0x8F) | ((direccion & 0x07) << 4));
     }
 
+    /**
+     * Establece el estado de vuelo según el tipo de catapulta (1 norte, 2 sur, 3 este, 4 oeste)
+     * @param tipoCatapulta
+     */
     public void setVolandoCat(int tipoCatapulta) {
         if (tipoCatapulta == CATSOUTH) setVolando(DIRSOUTH);
         else if (tipoCatapulta == CATNORTH) setVolando(DIRNORTH);
@@ -206,6 +258,11 @@ public class Nodo {
         else if (tipoCatapulta == CATWEST) setVolando(DIRWEST);
     }
 
+    /**
+     * Devuelve true si la catapulta con el ID dado ha sido activada, false si no
+     * @param id
+     * @return
+     */
     private boolean isMonedaRecogida(int id) {
         if (id < 0 || id >= 128) return true; // ID fuera de rango
         int bloque = id / 64;
@@ -216,6 +273,10 @@ public class Nodo {
             return (monedas2 & (1L << bit)) != 0;
     }
 
+    /**
+     * Marca la moneda con el ID dado como recogida en el nodo actual
+     * @param id
+     */
     private void marcarMonedaRecogida(int id) {
         if (id < 0 || id >= 128) return;
         int bloque = id / 64;
@@ -226,6 +287,11 @@ public class Nodo {
             monedas2 |= (1L << bit);
     }
 
+    /**
+     * Devuelve true si la catapulta con el ID dado ha sido activada, false si no
+     * @param id
+     * @return
+     */
      private boolean isCatapultaActivada(int id) {
         if (id < 0 || id >= 128) return true; // ID fuera de rango
         int bloque = id / 64;
@@ -236,6 +302,10 @@ public class Nodo {
             return (catapultas2 & (1L << bit)) != 0;
     }
 
+    /**
+     * Marca la catapulta con el ID dado como activada en el nodo actual
+     * @param id
+     */
     private void marcarCatapultaActivada(int id) {
         if (id < 0 || id >= 128) return;
         int bloque = id / 64;
@@ -246,6 +316,13 @@ public class Nodo {
             catapultas2 |= (1L << bit);
     }
 
+    /**
+     * Devuelve true si la posición (x,y) está fuera de los límites del mapa, false si está dentro
+     * @param x
+     * @param y
+     * @param mapa
+     * @return
+     */
     private boolean outOfBounds(int x, int y, Mapa mapa) {
         return x < 0 || x >= mapa.xmax || y < 0 || y >= mapa.ymax;
     }
@@ -253,24 +330,47 @@ public class Nodo {
 
     // --- OPERACIONES ---
 
+    /**
+     * Calcula la distancia Manhattan entre este nodo y otro nodo dado
+     * @param otro
+     * @return
+     */
     public int distanciaManhattan(Nodo otro) {
         return Math.abs(this.x - otro.x) + Math.abs(this.y - otro.y);
     }
 
+    /**
+     * Devuelve true si el nodo se considera muerto (ha perdido todas las monedas o ha caído al agua sin estar volando), false si no
+     * @param mapa
+     * @return
+     */
     public boolean estaMuerto(Mapa mapa) {
         if (isVolando() == 0 && getCasilla(mapa) == AGUA)
             return true;
         return getMoneda() == 7;
     }
 
+    /**
+     * Devuelve el tipo de casilla en la que se encuentra el nodo según el mapa dado (PARED, AGUA, PUERTA, VACIO, etc.)
+     * @param mapa
+     * @return
+     */
     public int getCasilla(Mapa mapa) {
         return mapa.grid[y][x];
     }
 
+    /**
+     * Da la acción que se tomó para llegar a este nodo desde su padre. O null si es el nodo raíz.
+     * @return
+     */
     public ACTIONS getAccionPadre() {
         return accionPrecedente;
     }
 
+    /**
+     * Devuelve el nodo padre del nodo actual.
+     * @return
+     */
     public Nodo getPadre() {
         return padre;
     }
@@ -298,7 +398,7 @@ public class Nodo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, flags, monedas1, monedas2, catapultas1, catapultas2);
+        return Objects.hash(x, y, flags, accionPrecedente, monedas1, monedas2, catapultas1, catapultas2);
     }
 
 }

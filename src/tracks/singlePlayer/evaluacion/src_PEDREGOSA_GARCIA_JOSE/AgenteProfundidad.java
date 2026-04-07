@@ -48,12 +48,12 @@ public class AgenteProfundidad extends AbstractPlayer {
         mapa = new Mapa(stateObs, posicion, portal);
         nodoActual = new Nodo((short) posicion.x, (short) posicion.y, 0, false, (byte) 0);
 
-        Nodo nodo = new Nodo((short) posicion.x, (short) posicion.y, 1, false, (byte) 0);
+        /*Nodo nodo = new Nodo((short) posicion.x, (short) posicion.y, 1, false, (byte) 0);
         System.out.println("Nodo inicial: " + nodo);
         ArrayList<Nodo> hijos = nodo.expandir(mapa);
         for (Nodo hijo : hijos) {
             System.out.println("Hijo: " + hijo);
-        }
+        } */
     }
 
     @Override
@@ -109,6 +109,7 @@ public class AgenteProfundidad extends AbstractPlayer {
             plan.add(0, actual.getAccionPadre());
             actual = actual.getPadre();
         }
+        System.out.println("Plan encontrado: " + plan);
         return plan;
     }
 }

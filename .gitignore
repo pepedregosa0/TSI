@@ -28,6 +28,8 @@ production/
 *.gif
 *.pyc
 
+*.txt
+
 clients/GVGAI-JavaClient/src/sampleRandom.zip
 
 
