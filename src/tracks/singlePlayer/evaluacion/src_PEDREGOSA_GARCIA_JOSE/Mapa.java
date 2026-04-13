@@ -11,18 +11,29 @@ public class Mapa {
     public int ymax;
     public int xmax;
 
+    public Vector2d posicion;
+    public Vector2d portal;
+    public short posicionX;
+    public short posicionY;
+    public short portalX;
+    public short portalY;
+
+    // Representacion del mapa
     public byte grid[][];
     public boolean mapaMonedas[][];
     public boolean mapaLlaves[][];
     public byte mapaCatapultas[][];
-
+    
     // Guardar los ids de cada moneda y cada catapulta para poder identificarlas fácilmente
     public int[][] idMonedas;
     public int[][] idCatapultas;
     public int totalMonedas = 0;
     public int totalCatapultas = 0;
+    
+    // Para algoritmos informados
+    public int mapaHeuristico[][];
 
-    public Mapa(StateObservation stateObs, Vector2d posicion, Vector2d portal) {
+    public Mapa(StateObservation stateObs) {
         ArrayList<Observation>[][] obsGrid = stateObs.getObservationGrid();
         this.ymax = obsGrid.length;
         this.xmax = obsGrid[0].length;
@@ -35,6 +46,8 @@ public class Mapa {
         idMonedas = new int[ymax][xmax];
         idCatapultas = new int[ymax][xmax];
 
+        mapaHeuristico = new int[ymax][xmax];
+
         for (int i = 0; i < ymax; i++) { 
             for (int j = 0; j < xmax; j++) {
                 grid[i][j] = SUELO;
@@ -46,7 +59,23 @@ public class Mapa {
                 idCatapultas[i][j] = -1;
             }
         }
-        
+
+        // Para conseguir la posicion del personaje y del portal
+        int blockSize = stateObs.getBlockSize();
+
+        ArrayList<Observation>[] posiciones = stateObs.getPortalsPositions(stateObs.getAvatarPosition());
+        portal = posiciones[0].get(0).position;
+        portal.x = Math.floor(portal.x / blockSize);
+        portal.y = Math.floor(portal.y / blockSize);
+        portalX = (short) portal.x;
+        portalY = (short) portal.y;
+        posicion = stateObs.getAvatarPosition();
+        posicion.x = Math.floor(posicion.x / blockSize);
+        posicion.y = Math.floor(posicion.y / blockSize);
+        posicionX = (short) posicion.x;
+        posicionY = (short) posicion.y;
+
+        //------------------------------------------------------------------------------------
         // Obstáculos
         int idWall = VGDLRegistry.GetInstance().getRegisteredSpriteValue("wall");
         int idWater = VGDLRegistry.GetInstance().getRegisteredSpriteValue("water");
@@ -103,8 +132,8 @@ public class Mapa {
                 }
             } 
         }
-        grid[(int)posicion.y][(int)posicion.x] = PERSONAJE;
-        grid[(int)portal.y][(int)portal.x] = PUERTA;
+        grid[(int)portalY][(int)portalX] = PUERTA;
+        grid[(int)posicionY][(int)posicionX] = PERSONAJE;
 
 
         ArrayList<Observation>[] resourcesPositions = stateObs.getResourcesPositions();
@@ -123,6 +152,12 @@ public class Mapa {
             } 
         }
 
+        // Para el mapa heuristico
+        for (int i = 0; i < ymax; i++) { 
+            for (int j = 0; j < xmax; j++) {
+                mapaHeuristico[i][j] = distanciaManhattan(j, i, (int)portalX, (int)portalY);
+            }
+        }
         //System.out.println(this);
     }
 
@@ -152,6 +187,7 @@ public class Mapa {
 
                 System.arraycopy(this.idMonedas[i], 0, copia.idMonedas[i], 0, this.xmax);
                 System.arraycopy(this.idCatapultas[i], 0, copia.idCatapultas[i], 0, this.xmax);
+                System.arraycopy(this.mapaHeuristico[i], 0, copia.mapaHeuristico[i], 0, this.xmax);
             }
 
             this.totalCatapultas = other.totalCatapultas;
@@ -206,6 +242,35 @@ public class Mapa {
             }
             mapa += "\n";
         }
+        mapa += "Mapa heurístico:\n";
+        for (int i = 0; i < ymax; i++) {
+            for (int j = 0; j < xmax; j++) {
+                mapa += (mapaHeuristico[i][j] + " ");
+            }
+            mapa += "\n";
+        }
+        mapa += "Posición del personaje: (" + posicionX + ", " + posicionY + ")\n";
+        mapa += "Posición del portal: (" + portalX + ", " + portalY + ")\n";
         return mapa;
+    }
+
+    /**
+	 * Calcula la distancia Manhattan entre una casilla y otra
+	 * @param otro
+	 * @return
+	 */
+	public int distanciaManhattan(int x1, int y1, int x2, int y2) {
+		return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+	}
+
+    /**
+     * Devuelve la heurística de una casilla dada,
+     * se calcula con la distancia Manhattan entre la casilla y el portal, ignorando obstáculos
+     * @param x
+     * @param y
+     * @return
+     */
+    public int H(int x, int y) {
+        return mapaHeuristico[y][x];
     }
 }

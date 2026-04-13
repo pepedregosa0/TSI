@@ -31,6 +31,11 @@ public class Nodo {
 	public long catapultas1 = 0L;
 	public long catapultas2 = 0L;
 
+	// Para algoritmos informados
+	public int g = 0; // coste desde el nodo inicial hasta este nodo
+	public int h; // heurística: estimación del coste desde este nodo hasta el nodo objetivo
+	public int f; // f = g + h, coste total estimado del camino pasando por este nodo
+
 	/**
 	 * Constructor para el nodo raíz.
 	 * @param x
@@ -65,9 +70,17 @@ public class Nodo {
 		this.catapultas1 = padre.catapultas1;
 		this.catapultas2 = padre.catapultas2;
 		this.padre = padre;
+
+		// Para algoritmos informados
+		this.g = padre.g + 1; // El coste g se incrementa en 1 respecto al padre
 	}
 
-	// TODO probar que funciona correctamente spoiler no funciona
+	/**
+	 * Genera los nodos hijos del nodo actual, aplicando las reglas del juego 
+	 * (movimiento, recogida de monedas, uso de catapultas, etc.) según el mapa dado
+	 * @param mapa
+	 * @return
+	 */
 	public ArrayList<Nodo> expandir(Mapa mapa) {
 		ArrayList<Nodo> hijos = new ArrayList<>();
 		// Movimiento volando
@@ -330,15 +343,6 @@ public class Nodo {
 	
 
 	// --- OPERACIONES ---
-
-	/**
-	 * Calcula la distancia Manhattan entre este nodo y otro nodo dado
-	 * @param otro
-	 * @return
-	 */
-	public int distanciaManhattan(Nodo otro) {
-		return Math.abs(this.x - otro.x) + Math.abs(this.y - otro.y);
-	}
 
 	/**
 	 * Devuelve true si el nodo se considera muerto (ha perdido todas las monedas o ha caído al agua sin estar volando), false si no
