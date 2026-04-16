@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 
-public class Nodo {
+public class Nodo implements Comparable<Nodo> {
 	private static final short[] dx = {1, 0, -1, 0};
 	private static final short[] dy = {0, -1, 0, 1};
 	private static final ACTIONS[] acciones = {ACTIONS.ACTION_RIGHT, ACTIONS.ACTION_UP, ACTIONS.ACTION_LEFT, ACTIONS.ACTION_DOWN};
@@ -33,8 +33,9 @@ public class Nodo {
 
 	// Para algoritmos informados
 	public int g = 0; // coste desde el nodo inicial hasta este nodo
-	public int h; // heurística: estimación del coste desde este nodo hasta el nodo objetivo
-	public int f; // f = g + h, coste total estimado del camino pasando por este nodo
+	public int h = 0; // heurística (estimación del coste desde este nodo hasta el objetivo)
+	public int f = 0; // f = g + h
+	public int idInsercion; // para el desempate en la cola de prioridad (nodo más antiguo)
 
 	/**
 	 * Constructor para el nodo raíz.
@@ -70,9 +71,6 @@ public class Nodo {
 		this.catapultas1 = padre.catapultas1;
 		this.catapultas2 = padre.catapultas2;
 		this.padre = padre;
-
-		// Para algoritmos informados
-		this.g = padre.g + 1; // El coste g se incrementa en 1 respecto al padre
 	}
 
 	/**
@@ -405,5 +403,27 @@ public class Nodo {
 	public int hashCode() {
 		return Objects.hash(x, y, flags, monedas1, monedas2, catapultas1, catapultas2);
 	}
+
+	public boolean esMeta(Mapa mapa) {
+		return this.x == mapa.portalX && this.y == mapa.portalY;
+	}
+
+	// FUNCIONES PARA ALGORITMOS INFORMADOS
+
+	@Override
+    public int compareTo(Nodo otro) {
+        //  menor f(n)
+        if (this.f != otro.f) {
+            return Integer.compare(this.f, otro.f);
+        }
+        
+        // menor h(n)
+        if (this.h != otro.h) {
+            return Integer.compare(this.h, otro.h);
+        }
+        
+        // el nodo más antiguo (menor ID)
+        return Integer.compare(this.idInsercion, otro.idInsercion);
+    }
 
 }

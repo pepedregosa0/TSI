@@ -62,7 +62,7 @@ public class AgenteProfundidad extends AbstractPlayer {
     private Nodo DFSRecursivo(Nodo actual, HashSet<Nodo> visitados)
     {
         // Criterio de parada
-        if (((short) mapa.portalX) == actual.x && ((short) mapa.portalY) == actual.y)
+        if (actual.esMeta(mapa))
             return actual;
 
         visitados.add(actual);
