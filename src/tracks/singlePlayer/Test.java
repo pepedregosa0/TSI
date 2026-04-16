@@ -26,8 +26,9 @@ public class Test {
 		String sampleOLETSController = "tracks.singlePlayer.advanced.olets.Agent";
 
 		// MY CONTROLLER
-		//String myDFSController = "tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.AgenteProfundidad";
+		String myDFSController = "tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.AgenteProfundidad";
 		String myAStarController = "tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.AgenteAStar";
+		String myRTAStarController = "tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.AgenteRTAStar";
 
 		//Load available games
 		String spGamesCollection =  "examples/all_games_sp.csv";
@@ -40,7 +41,7 @@ public class Test {
 		// Game and level to play
 		// Para catapults 122, para competicion 123
 		int gameIdx = 122;
-		int levelIdx = 1; // level names from 0 to 4 (game_lvlN.txt).
+		int levelIdx = 6; // level names from 0 to 4 (game_lvlN.txt).
 		String gameName = games[gameIdx][1];
 		String game = games[gameIdx][0];
 		String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
@@ -56,7 +57,8 @@ public class Test {
 		// 2. This plays a game in a level by the controller.
 //		ArcadeMachine.runOneGame(game, level1, visuals, sampleRHEAController, recordActionsFile, seed, 0);
 		//ArcadeMachine.runOneGame(game, level1, visuals, myDFSController, null, seed, 0);
-		ArcadeMachine.runOneGame(game, level1, visuals, myAStarController, recordActionsFile, seed, 0);
+		//ArcadeMachine.runOneGame(game, level1, visuals, myAStarController, null, seed, 0);
+		ArcadeMachine.runOneGame(game, level1, visuals, myRTAStarController, null, seed, 0);
 
 
 		// 3. This replays a game from an action file previously recorded
