@@ -40,6 +40,10 @@ public class AgenteRTAStar extends AgenteHeuristico {
         long fin = System.nanoTime();
 
         tiempoEjecucion += (fin - inicio);
+        MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
+        MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
+        MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
+        MetricsProvider.getInstance().printMetrics();
         return siguienteAccion;
     }
 
