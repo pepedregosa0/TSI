@@ -15,80 +15,89 @@ import tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.Mapa;
 // los elementos comunes a todos los algoritmos.
 
 public class AgenteProfundidad extends AbstractPlayer {
-    public Nodo nodoActual;
-    public Mapa mapa;
+	private Nodo nodoActual;
+	private Mapa mapa;
 
-    public int nodosExpandidos = 0;
-    public int profundidadMaxima = 0;
+	private int nodosExpandidos = 0;
+	private int profundidadMaxima = 0;
+	private long tiempoEjecucion;
 
-    private ArrayList<ACTIONS> plan = null;
+	private ArrayList<ACTIONS> plan = null;
 
-    public AgenteProfundidad(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
-        super();
+	public AgenteProfundidad(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
+		super();
 
-        mapa = new Mapa(stateObs);
-        nodoActual = new Nodo((short) mapa.posicionX, (short) mapa.posicionY, 0, false, (byte) 0);
-    }
+		mapa = new Mapa(stateObs);
+		nodoActual = new Nodo((short) mapa.posicionX, (short) mapa.posicionY, 0, false, (byte) 0);
+	}
 
-    @Override
-    public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
-        if (plan == null) {
-            MetricsProvider.getInstance().setNumAccionesPlan(-1);
+	@Override
+	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
+		if (plan == null) {
+			MetricsProvider.getInstance().setNumAccionesPlan(-1);
 
-            HashSet<Nodo> visitados = new HashSet<>();
-            Nodo meta = DFSRecursivo(nodoActual, visitados);
-            if (meta != null) {
-                plan = reconstruirPlan(meta);
-                MetricsProvider.getInstance().setNumAccionesPlan(plan.size());
-                MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
-                MetricsProvider.getInstance().setProfundidadMaxima(profundidadMaxima);
-                MetricsProvider.getInstance().printMetrics();
-            }
-            else {
-                System.out.println("No se ha encontrado un plan");
-                plan = new ArrayList<>();
-                plan.add(ACTIONS.ACTION_NIL);
-            }
-        }
-        if (plan.size() > 0) {
-            ACTIONS accion = plan.remove(0);
-            System.out.println("Accion: " + accion);
-            return accion;
-        }
-        
-        return ACTIONS.ACTION_NIL;
-    }
+			HashSet<Nodo> visitados = new HashSet<>();
+			long inicio = System.nanoTime();
+			Nodo meta = DFSRecursivo(nodoActual, visitados);
+			long fin = System.nanoTime();
+			tiempoEjecucion = (fin - inicio);
+			if (meta != null) {
+				plan = reconstruirPlan(meta);
+				imprimirMetricas();
+			}
+			else {
+				System.out.println("No se ha encontrado un plan");
+				plan = new ArrayList<>();
+				plan.add(ACTIONS.ACTION_NIL);
+			}
+		}
+		if (plan.size() > 0) {
+			ACTIONS accion = plan.remove(0);
+			System.out.println("Accion: " + accion);
+			return accion;
+		}
+		
+		return ACTIONS.ACTION_NIL;
+	}
 
-    private Nodo DFSRecursivo(Nodo actual, HashSet<Nodo> visitados)
-    {
-        // Criterio de parada
-        if (actual.esMeta(mapa))
-            return actual;
+	private Nodo DFSRecursivo(Nodo actual, HashSet<Nodo> visitados)
+	{
+		// Criterio de parada
+		if (actual.esMeta(mapa))
+			return actual;
 
-        visitados.add(actual);
-        // Expandimos el nodo actual
-        ArrayList<Nodo> hijos = actual.expandir(mapa);
-        nodosExpandidos++;
-        for (Nodo hijo : hijos) {
-            if (!visitados.contains(hijo)) {
-                if (hijo.g > profundidadMaxima)
-                    profundidadMaxima = hijo.g;
-                Nodo resultado = DFSRecursivo(hijo, visitados);
-                if (resultado != null)
-                    return resultado;
-            }
-        }
-        return null;
-    }
+		visitados.add(actual);
+		// Expandimos el nodo actual
+		ArrayList<Nodo> hijos = actual.expandir(mapa);
+		nodosExpandidos++;
+		for (Nodo hijo : hijos) {
+			if (!visitados.contains(hijo)) {
+				if (hijo.g > profundidadMaxima)
+					profundidadMaxima = hijo.g;
+				Nodo resultado = DFSRecursivo(hijo, visitados);
+				if (resultado != null)
+					return resultado;
+			}
+		}
+		return null;
+	}
 
-    private ArrayList<ACTIONS> reconstruirPlan(Nodo meta) {
-        ArrayList<ACTIONS> plan = new ArrayList<>();
-        Nodo actual = meta;
-        while (actual.getPadre() != null) {
-            plan.add(0, actual.getAccionPadre());
-            actual = actual.getPadre();
-        }
-        //System.out.println("Plan encontrado: " + plan);
-        return plan;
-    }
+	private ArrayList<ACTIONS> reconstruirPlan(Nodo meta) {
+		ArrayList<ACTIONS> plan = new ArrayList<>();
+		Nodo actual = meta;
+		while (actual.getPadre() != null) {
+			plan.add(0, actual.getAccionPadre());
+			actual = actual.getPadre();
+		}
+		//System.out.println("Plan encontrado: " + plan);
+		return plan;
+	}
+
+	private void imprimirMetricas() {
+		MetricsProvider.getInstance().setNumAccionesPlan(plan.size());
+		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
+		MetricsProvider.getInstance().setProfundidadMaxima(profundidadMaxima);
+		MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
+		MetricsProvider.getInstance().printMetrics();
+	}
 }

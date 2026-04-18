@@ -35,11 +35,7 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		if (nodoActual.esMeta(mapa)) {
-			MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
-			MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
-			MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
-			MetricsProvider.getInstance().printMetrics();
-
+			imprimirMetricas();
 			return ACTIONS.ACTION_NIL;
 		}
 		long inicio = System.nanoTime();
@@ -48,26 +44,17 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 		long fin = System.nanoTime();
 
 		tiempoEjecucion += (fin - inicio);
-		MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
-		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
-		MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
-		MetricsProvider.getInstance().setNumActualizacionesTabla(actualizacionesHeuristica);
-		MetricsProvider.getInstance().printMetrics();
+		imprimirMetricas();
 		return siguienteAccion;
 	}
 
 	private ACTIONS LRTAStarK(Nodo nodo) {
 		// Espacio local de busqueda
 		ArrayList<Nodo> vecinos = nodoActual.expandir(mapa);
-		nodosExpandidos++;
+		// No contamos otra expansion ya que se ha hecho en lookAheadUpdateK
 		
 		// Si ha muerto o atrapado
 		if (vecinos.isEmpty()) {
-			MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
-			MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
-			MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
-			MetricsProvider.getInstance().setNumActualizacionesTabla(actualizacionesHeuristica);
-			MetricsProvider.getInstance().printMetrics();
 			return ACTIONS.ACTION_NIL;
 		}
 		
@@ -100,12 +87,15 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 			Nodo x = cola.poll();
 		
 			ArrayList<Nodo> sucesoresX = x.expandir(mapa);
+			nodosExpandidos++;
 			Nodo mejorVecinoX = null;
 			int minF = Integer.MAX_VALUE;
 
+			if (sucesoresX.isEmpty())
+				continue;
+
 			for (Nodo sucesorX : sucesoresX) {
-				int hVecino = tablaHeuristica.getOrDefault(sucesorX, mapa.H(sucesorX.x, sucesorX.y));
-				int fVecino = 1 + hVecino;
+				int fVecino = 1 + heuristica(sucesorX);
 
 				if (fVecino < minF) {
 					minF = fVecino;
@@ -116,7 +106,7 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 			tablaSoportes.put(x, mejorVecinoX);
 
 			boolean propagar = false;
-			int hXActual = tablaHeuristica.getOrDefault(x, mapa.H(x.x, x.y));
+			int hXActual = heuristica(x);
 
 			if (hXActual < minF) {
 				tablaHeuristica.put(x, minF);
@@ -142,6 +132,14 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 		if (tablaHeuristica.containsKey(nodo))
 			return tablaHeuristica.get(nodo);
 		return mapa.H(nodo.x, nodo.y);
+	}
+
+	private void imprimirMetricas() {
+		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
+		MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
+		MetricsProvider.getInstance().setNumActualizacionesTabla(actualizacionesHeuristica);
+		MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
+		MetricsProvider.getInstance().printMetrics();
 	}
 		
 }

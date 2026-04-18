@@ -28,10 +28,7 @@ public class AgenteRTAStar extends AgenteHeuristico {
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		if (nodoActual.esMeta(mapa)) {
-			MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
-			MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
-			MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
-			MetricsProvider.getInstance().printMetrics();
+			imprimirMetricas();
 
 			return ACTIONS.ACTION_NIL;
 		}
@@ -40,10 +37,7 @@ public class AgenteRTAStar extends AgenteHeuristico {
 		long fin = System.nanoTime();
 
 		tiempoEjecucion += (fin - inicio);
-		MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
-		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
-		MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
-		MetricsProvider.getInstance().printMetrics();
+		imprimirMetricas();
 		return siguienteAccion;
 	}
 
@@ -54,10 +48,7 @@ public class AgenteRTAStar extends AgenteHeuristico {
 
 		// Si ha muerto o atrapado
 		if (vecinos.isEmpty()) {
-			MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
-			MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
-			MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
-			MetricsProvider.getInstance().printMetrics();
+			imprimirMetricas();
 			return ACTIONS.ACTION_NIL;
 		}
 
@@ -103,6 +94,13 @@ public class AgenteRTAStar extends AgenteHeuristico {
 		if (tablaHeuristica.containsKey(nodo))
 			return tablaHeuristica.get(nodo);
 		return mapa.H(nodo.x, nodo.y);
+	}
+
+	private void imprimirMetricas() {
+		MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
+		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
+		MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
+		MetricsProvider.getInstance().printMetrics();
 	}
 	
 }
