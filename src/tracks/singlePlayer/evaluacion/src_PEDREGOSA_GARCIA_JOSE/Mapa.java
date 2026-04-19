@@ -177,7 +177,7 @@ public class Mapa {
 		mapaCatapultas = new byte[ymax][xmax];
 	}
 
-	// Método para copiar el mapa de forma eficiente
+	// Método para copiar el mapa de forma eficiente (creo que se usa, pero por si acaso)
 	public Mapa copy(Mapa other)
 	{
 		if (this != other)
@@ -204,6 +204,7 @@ public class Mapa {
 		return this;
 	}
 
+	// DEPURACION
 	@Override
 	public String toString() {
 		String mapa = "";

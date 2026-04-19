@@ -8,23 +8,25 @@ import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.MetricsProvider;
 
-// Nota: Se puede heredar de otras clases personalizadas por el alumnado que hereden de AbstractPlayer para generalizar
-// los elementos comunes a todos los algoritmos.
-
 public class AgenteRTAStar extends AgenteHeuristico {
-
+	// METRICAS
 	private int nodosExpandidos;
 	private int numAcciones;
 	private long tiempoEjecucion;
 
+	// Tabla hash para almacenar las heurísticas aprendidas durante la ejecución del algoritmo
+	// y evitar caer en ciclos infinitos.
 	private HashMap<Nodo, Integer> tablaHeuristica;
 
 	public AgenteRTAStar(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
+		// Inicializacion con agente heuristico
 		super(stateObs, elapsedTimer);
+		
 		nodosExpandidos = 0;
 		numAcciones = 0;
 		tablaHeuristica = new HashMap<>();
 	}
+
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		if (nodoActual.esMeta(mapa)) {
@@ -41,6 +43,11 @@ public class AgenteRTAStar extends AgenteHeuristico {
 		return siguienteAccion;
 	}
 
+	/**
+	 * Realiza una iteración del algoritmo RTA* para seleccionar la siguiente acción a tomar desde el nodo actual.
+	 * @param nodo El nodo actual desde el cual se desea seleccionar la siguiente acción.
+	 * @return La acción seleccionada para avanzar hacia el objetivo. Si no se pueden expandir vecinos, se devuelve ACTION_NIL.
+	 */
 	private ACTIONS RTAStar(Nodo nodo) {
 		// Espacio local de busqueda
 		ArrayList<Nodo> vecinos = nodoActual.expandir(mapa);
@@ -90,12 +97,23 @@ public class AgenteRTAStar extends AgenteHeuristico {
 		return accionSeleccionada;
 	}
 
+	/**
+	 * @param nodo El nodo para el cual se desea calcular la heurística.
+	 * @return El valor de la heurística para el nodo dado. Si el nodo no ha sido evaluado previamente, se calcula utilizando el mapa y se devuelve el resultado.
+	 */
 	private int heuristica(Nodo nodo) {
 		if (tablaHeuristica.containsKey(nodo))
 			return tablaHeuristica.get(nodo);
 		return mapa.H(nodo.x, nodo.y);
 	}
 
+	/**
+	 * Imprime las métricas de rendimiento del agente.
+	 * Métricas incluidas:
+	 * - Número de acciones tomadas hasta el momento.
+	 * - Número de nodos expandidos durante la búsqueda.
+	 * - Tiempo de ejecución acumulado en milisegundos.
+	 */
 	private void imprimirMetricas() {
 		MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
 		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);

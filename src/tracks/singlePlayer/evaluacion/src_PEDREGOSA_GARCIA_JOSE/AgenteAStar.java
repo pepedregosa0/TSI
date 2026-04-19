@@ -11,19 +11,20 @@ import java.util.PriorityQueue;
 import java.util.HashSet;
 import java.util.HashMap;
 
-// Nota: Se puede heredar de otras clases personalizadas por el alumnado que hereden de AbstractPlayer para generalizar
-// los elementos comunes a todos los algoritmos.
-
 public class AgenteAStar extends AgenteHeuristico {
+	// Estructuras de datos para A*
 	private PriorityQueue<Nodo> abiertos;
 	private HashSet<Nodo> cerrados;
 	private HashMap<Nodo, Integer> mapaCostos;
+	
+	// METRICAS
+	private int nodosExpandidos;
 	private long tiempoEjecucion;
 
-	private int nodosExpandidos;
-
 	public AgenteAStar(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
+		// Inicialización de agente heurístico
 		super(stateObs, elapsedTimer);
+
 		abiertos = new PriorityQueue<>();
 		cerrados = new HashSet<>();
 		mapaCostos = new HashMap<>();
@@ -57,6 +58,13 @@ public class AgenteAStar extends AgenteHeuristico {
 	}
 
 
+	/**
+	 * Implementación del algoritmo A* para encontrar el camino óptimo desde el nodo inicial hasta la meta.
+	 * El algoritmo utiliza una cola de prioridad para gestionar los nodos abiertos,
+	 * un conjunto para los nodos cerrados y un mapa para almacenar los costos g(n) de cada nodo.
+	 * @param nodoInicial El nodo desde el cual se inicia la búsqueda.
+	 * @return El nodo meta encontrado, o null si no se encuentra una solución.
+	 */
 	private Nodo AStar(Nodo nodoInicial) {
 		nodoInicial.g = 0;
 		nodoInicial.h = mapa.H(nodoInicial.x, nodoInicial.y);
@@ -102,12 +110,21 @@ public class AgenteAStar extends AgenteHeuristico {
 		return null; // no hay solucion
 	}
 
+	/**
+	 * Imprime las métricas de la ejecución del algoritmo A*.
+	 * Métricas incluidas:
+	 * - Número de acciones en el plan encontrado.
+	 * - Número de nodos abiertos durante la búsqueda.
+	 * - Número de nodos cerrados durante la búsqueda.
+	 * - Número de nodos expandidos durante la búsqueda.
+	 * - Tiempo de ejecución en milisegundos.
+	 */
 	private void imprimirMetricas() {
 		MetricsProvider.getInstance().setNumAccionesPlan(plan.size());
 		MetricsProvider.getInstance().setNodosAbiertos(abiertos.size());
 		MetricsProvider.getInstance().setNodosCerrados(cerrados.size());
-		MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
 		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
+		MetricsProvider.getInstance().setTiempoMilisegundos(tiempoEjecucion / 1000000);
 		MetricsProvider.getInstance().printMetrics();
 	}
 }

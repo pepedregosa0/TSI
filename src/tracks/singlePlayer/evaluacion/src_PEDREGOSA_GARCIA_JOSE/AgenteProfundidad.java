@@ -8,21 +8,17 @@ import core.player.AbstractPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.MetricsProvider;
-import tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.Nodo;
-import tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.Mapa;
-
-// Nota: Se puede heredar de otras clases personalizadas por el alumnado que hereden de AbstractPlayer para generalizar
-// los elementos comunes a todos los algoritmos.
 
 public class AgenteProfundidad extends AbstractPlayer {
 	private Nodo nodoActual;
 	private Mapa mapa;
+	private ArrayList<ACTIONS> plan = null;
 
+	// METRICAS
 	private int nodosExpandidos = 0;
 	private int profundidadMaxima = 0;
 	private long tiempoEjecucion;
 
-	private ArrayList<ACTIONS> plan = null;
 
 	public AgenteProfundidad(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		super();
@@ -57,6 +53,12 @@ public class AgenteProfundidad extends AbstractPlayer {
 		return ACTIONS.ACTION_NIL;
 	}
 
+	/**
+	 * Búsqueda en profundidad recursiva
+	 * @param actual Nodo actual a expandir
+	 * @param visitados Conjunto de nodos ya visitados para evitar ciclos
+	 * @return Nodo meta si se encuentra, null si no se encuentra en esta rama
+	 */
 	private Nodo DFSRecursivo(Nodo actual, HashSet<Nodo> visitados)
 	{
 		// Criterio de parada
@@ -80,6 +82,12 @@ public class AgenteProfundidad extends AbstractPlayer {
 		return null;
 	}
 
+	/**
+	 * Reconstruye el plan desde el nodo meta hasta la raíz utilizando los nodos padre y las acciones que llevaron a cada nodo
+	 * para generar la secuencia de acciones que forman el plan.
+	 * @param meta Nodo meta encontrado por la búsqueda
+	 * @return Lista de acciones que forman el plan desde el estado inicial hasta el estado meta.
+	 */
 	private ArrayList<ACTIONS> reconstruirPlan(Nodo meta) {
 		ArrayList<ACTIONS> plan = new ArrayList<>();
 		Nodo actual = meta;
@@ -91,6 +99,14 @@ public class AgenteProfundidad extends AbstractPlayer {
 		return plan;
 	}
 
+	/**
+	 * Imprime las métricas de la búsqueda utilizando el MetricsProvider.
+	 * Metricas incluidas:
+	 * - Número de acciones en el plan encontrado
+	 * - Número de nodos expandidos durante la búsqueda
+	 * - Profundidad máxima alcanzada durante la búsqueda
+	 * - Tiempo de ejecución en milisegundos
+	 */
 	private void imprimirMetricas() {
 		MetricsProvider.getInstance().setNumAccionesPlan(plan.size());
 		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);

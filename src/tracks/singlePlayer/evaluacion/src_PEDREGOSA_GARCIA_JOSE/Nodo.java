@@ -1,7 +1,6 @@
 package tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE;
 
 import static tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.Constantes.*;
-import tracks.singlePlayer.evaluacion.src_PEDREGOSA_GARCIA_JOSE.Mapa;
 import ontology.Types.ACTIONS;
 import java.util.ArrayList;
 import java.util.Objects;

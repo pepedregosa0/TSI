@@ -9,29 +9,33 @@ import tools.ElapsedCpuTimer;
 import tracks.singlePlayer.MetricsProvider;
 
 import java.util.LinkedList;
-// Nota: Se puede heredar de otras clases personalizadas por el alumnado que hereden de AbstractPlayer para generalizar
-// los elementos comunes a todos los algoritmos.
 
 public class AgenteLRTAStarK extends AgenteHeuristico {
-
+	// Valor de k para el look-ahead
 	private static int k = 5;
+	
+	// Tablas para almacenar la heurística y los soportes de los nodos en el look-ahead
+	private HashMap<Nodo, Integer> tablaHeuristica;
+	private HashMap<Nodo, Nodo> tablaSoportes;
 
+	// METRICAS
 	private int nodosExpandidos;
 	private int numAcciones;
 	private int actualizacionesHeuristica;
 	private long tiempoEjecucion;
 
-	private HashMap<Nodo, Integer> tablaHeuristica;
-	private HashMap<Nodo, Nodo> tablaSoportes;
 
 	public AgenteLRTAStarK(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
+		// Inicializacion con agente heuristico
 		super(stateObs, elapsedTimer);
+
 		nodosExpandidos = 0;
 		numAcciones = 0;
 		actualizacionesHeuristica = 0;
 		tablaHeuristica = new HashMap<>();
 		tablaSoportes = new HashMap<>();
 	}
+
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		if (nodoActual.esMeta(mapa)) {
@@ -48,6 +52,13 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 		return siguienteAccion;
 	}
 
+	/**
+	 * Selecciona la mejor acción a tomar desde el nodo actual utilizando la función f(n) = g(n) + h(n),
+	 * donde g(n) es el costo acumulado (en este caso, asumimos un costo uniforme de 1 por acción) y h(n) es la heurística del nodo.
+	 * La heurística es distinta para cada nodo y se actualiza en la tablaHeuristica durante el proceso de look-ahead.
+	 * @param nodo desde el cual se seleccionará la acción a tomar
+	 * @return la acción a tomar para avanzar hacia el nodo con el menor valor de f(n) entre los vecinos del nodo actual
+	 */
 	private ACTIONS LRTAStarK(Nodo nodo) {
 		// Espacio local de busqueda
 		ArrayList<Nodo> vecinos = nodoActual.expandir(mapa);
@@ -78,6 +89,12 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 		return mejorVecino.getAccionPadre();
 	}
 
+	/**
+	 * Realiza un look-ahead de profundidad k desde el nodo inicial, actualizando la heurística de los nodos visitados y sus soportes.
+	 * Para cada nodo visitado, se calcula el mejor vecino según la función f(n) y se actualiza la tabla de soportes. 
+	 * Si la heurística del nodo actual es menor que el valor mínimo encontrado entre sus vecinos,
+	 * se actualiza la heurística del nodo y se propaga el cambio a los nodos de los que es soporte, hasta un máximo de k propagaciones.
+	 */
 	private void lookAheadUpdateK(Nodo nodoInicial) {
 		LinkedList<Nodo> cola = new LinkedList<>();
 		cola.add(nodoInicial);
@@ -89,6 +106,7 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 			ArrayList<Nodo> sucesoresX = x.expandir(mapa);
 			nodosExpandidos++;
 			Nodo mejorVecinoX = null;
+			// Se utliza el primer mejor vecino
 			int minF = Integer.MAX_VALUE;
 
 			if (sucesoresX.isEmpty())
@@ -103,11 +121,14 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 				}
 			}
 
+			// Actualizamos la tabla de soportes para el nodo x
 			tablaSoportes.put(x, mejorVecinoX);
 
 			boolean propagar = false;
 			int hXActual = heuristica(x);
 
+			// En caso de que la heurística del nodo x sea menor que el valor mínimo
+			// actualizamos la heurística del nodo x y propagamos
 			if (hXActual < minF) {
 				tablaHeuristica.put(x, minF);
 				actualizacionesHeuristica++;
@@ -128,12 +149,25 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 		}
 	}
 
+	/**
+	 * Calcula la heurística de un nodo utilizando la tabla de heurísticas si el nodo ya ha sido visitado o H(nodo) si no se ha visitado antes. 
+	 * @param nodo para el cual se desea calcular la heurística
+	 * @return la heurística del nodo, que es el valor almacenado en la tabla de heurísticas si el nodo ya ha sido visitado, o H(nodo) si no se ha visitado antes
+	 */
 	private int heuristica(Nodo nodo) {
 		if (tablaHeuristica.containsKey(nodo))
 			return tablaHeuristica.get(nodo);
 		return mapa.H(nodo.x, nodo.y);
 	}
 
+	/**
+	 * Imprime las métricas del agente.
+	 * Incluye las métricas:
+	 * - Número de nodos expandidos
+	 * - Número de acciones tomadas
+	 * - Número de actualizaciones de la tabla heurística
+	 * - Tiempo de ejecución en milisegundos
+	 */
 	private void imprimirMetricas() {
 		MetricsProvider.getInstance().setNodosExpandidos(nodosExpandidos);
 		MetricsProvider.getInstance().setNumAccionesPlan(numAcciones);
