@@ -54,14 +54,15 @@ public class Test {
 
 		String level4 = game.replace(gameName, "mapaejercicio4");
 		// 1. This starts a game, in a level, played by a human.
-		ArcadeMachine.playOneGame(game, level4, recordActionsFile, seed);
+		//ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
+		//ArcadeMachine.playOneGame(game, level4, recordActionsFile, seed);
 
 		// 2. This plays a game in a level by the controller.
 //		ArcadeMachine.runOneGame(game, level1, visuals, sampleRHEAController, recordActionsFile, seed, 0);
 		//ArcadeMachine.runOneGame(game, level1, visuals, myDFSController, null, seed, 0);
 		//ArcadeMachine.runOneGame(game, level1, visuals, myAStarController, null, seed, 0);
 		//ArcadeMachine.runOneGame(game, level1, visuals, myRTAStarController, null, seed, 0);
-		//ArcadeMachine.runOneGame(game, level1, visuals, myLRTAStarKController, null, seed, 0);
+		ArcadeMachine.runOneGame(game, level1, visuals, myLRTAStarKController, null, seed, 0);
 
 
 		// mapaejercicio4.

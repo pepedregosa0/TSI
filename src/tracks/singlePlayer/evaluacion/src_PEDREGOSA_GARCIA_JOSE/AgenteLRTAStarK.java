@@ -43,8 +43,8 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 			return ACTIONS.ACTION_NIL;
 		}
 		long inicio = System.nanoTime();
-		lookAheadUpdateK(nodoActual);
-		ACTIONS siguienteAccion = LRTAStarK(nodoActual);
+		lookAheadUpdateK();
+		ACTIONS siguienteAccion = LRTAStarK();
 		long fin = System.nanoTime();
 
 		tiempoEjecucion += (fin - inicio);
@@ -56,10 +56,9 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 	 * Selecciona la mejor acción a tomar desde el nodo actual utilizando la función f(n) = g(n) + h(n),
 	 * donde g(n) es el costo acumulado (en este caso, asumimos un costo uniforme de 1 por acción) y h(n) es la heurística del nodo.
 	 * La heurística es distinta para cada nodo y se actualiza en la tablaHeuristica durante el proceso de look-ahead.
-	 * @param nodo desde el cual se seleccionará la acción a tomar
 	 * @return la acción a tomar para avanzar hacia el nodo con el menor valor de f(n) entre los vecinos del nodo actual
 	 */
-	private ACTIONS LRTAStarK(Nodo nodo) {
+	private ACTIONS LRTAStarK() {
 		// Espacio local de busqueda
 		ArrayList<Nodo> vecinos = nodoActual.expandir(mapa);
 		// No contamos otra expansion ya que se ha hecho en lookAheadUpdateK
@@ -95,9 +94,9 @@ public class AgenteLRTAStarK extends AgenteHeuristico {
 	 * Si la heurística del nodo actual es menor que el valor mínimo encontrado entre sus vecinos,
 	 * se actualiza la heurística del nodo y se propaga el cambio a los nodos de los que es soporte, hasta un máximo de k propagaciones.
 	 */
-	private void lookAheadUpdateK(Nodo nodoInicial) {
+	private void lookAheadUpdateK() {
 		LinkedList<Nodo> cola = new LinkedList<>();
-		cola.add(nodoInicial);
+		cola.add(nodoActual);
 
 		int contador = k - 1;
 		while (!cola.isEmpty()) {
