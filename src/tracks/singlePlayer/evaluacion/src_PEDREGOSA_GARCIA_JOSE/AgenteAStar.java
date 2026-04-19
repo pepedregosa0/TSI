@@ -35,7 +35,7 @@ public class AgenteAStar extends AgenteHeuristico {
 			long inicio = System.nanoTime();
 			Nodo meta = AStar(nodoActual);
 			long fin = System.nanoTime();
-			long tiempoEjecucion = (fin - inicio);
+			tiempoEjecucion = (fin - inicio);
 			
 			if (meta != null) {
 				plan = reconstruirPlan(meta);

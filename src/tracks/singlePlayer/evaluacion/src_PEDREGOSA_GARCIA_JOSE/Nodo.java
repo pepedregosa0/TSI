@@ -38,12 +38,12 @@ public class Nodo implements Comparable<Nodo> {
 	public int idInsercion; // para el desempate en la cola de prioridad (nodo más antiguo)
 
 	/**
-	 * Constructor para el nodo raíz.
-	 * @param x
-	 * @param y
-	 * @param moneda
-	 * @param llave
-	 * @param volando dirección de vuelo (0 para no volando, 1 norte, 2 sur, 3 este, 4 oeste)
+	 * Constructor para el nodo raíz o estado inicial de la búsqueda.
+	 * @param x Coordenada X inicial del avatar en el mapa.
+	 * @param y Coordenada Y inicial del avatar en el mapa.
+	 * @param moneda Cantidad inicial de monedas en el inventario (0-5).
+	 * @param llave Indica si el avatar posee la llave (true) o no (false).
+	 * @param volando Dirección de vuelo actual (0: no volando, 1: norte, 2: sur, 3: este, 4: oeste).
 	 */
 	public Nodo(short x, short y, int moneda, boolean llave, byte volando) {
 		this.x = x;
@@ -58,9 +58,9 @@ public class Nodo implements Comparable<Nodo> {
 
 	/**
 	 * Copia el estado del nodo padre y lo actualiza con la nueva posición (x,y).
-	 * @param x
-	 * @param y
-	 * @param padre
+	 * @param x Coordenada X de la nueva posición.
+	 * @param y Coordenada Y de la nueva posición.
+	 * @param padre Nodo padre del cual se copia el estado.
 	 */
 	public Nodo(short x, short y, Nodo padre) {
 		this.x = x;
@@ -76,8 +76,8 @@ public class Nodo implements Comparable<Nodo> {
 	/**
 	 * Genera los nodos hijos del nodo actual, aplicando las reglas del juego 
 	 * (movimiento, recogida de monedas, uso de catapultas, etc.) según el mapa dado
-	 * @param mapa
-	 * @return
+	 * @param mapa Mapa que se utiliza para determinar las casillas, monedas, catapultas, etc. en el entorno
+	 * @return Una lista de nodos hijos que representan los estados alcanzables desde el nodo actual aplicando las acciones posibles.
 	 */
 	public ArrayList<Nodo> expandir(Mapa mapa) {
 		ArrayList<Nodo> hijos = new ArrayList<>();
@@ -182,7 +182,7 @@ public class Nodo implements Comparable<Nodo> {
 	/**
 	 * Devuelve el número de monedas que se tienen actualmente (0-5). Si devuelve 7, 
 	 * el nodo está muerto (ha perdido más monedas de las que tenía o ha caído al agua sin estar volando).
-	 * @return
+	 * @return Número de monedas (0-5) o 7 si el nodo está muerto.
 	 */
 	public int getMoneda() {
 		// (00000111) para leer los 3 primeros bits
@@ -192,7 +192,7 @@ public class Nodo implements Comparable<Nodo> {
 	/**
 	 * Establece el número de monedas (0-5) en el nodo actual.
 	 * Si se establece un valor menor que 0, se considera que el nodo está muerto
-	 * @param moneda
+	 * @param moneda Número de monedas a establecer (0-5). Si es menor que 0, el nodo se considera muerto.
 	 */
 	protected void setMoneda(int moneda) {
 		// Limpiamos los 3 primeros bits y escribimos el nuevo valor (0-5)
@@ -202,7 +202,7 @@ public class Nodo implements Comparable<Nodo> {
 
 	/**
 	 * Suma una moneda al nodo. Devuelve true si se ha podido recoger la moneda
-	 * @return
+	 * @return true si se ha podido recoger la moneda, false en caso contrario
 	 */
 	public boolean masMoneda() {
 		int moneda = getMoneda();
@@ -221,8 +221,7 @@ public class Nodo implements Comparable<Nodo> {
 	}
 
 	/**
-	 * Devuelve true si se tiene la llave, false si no se tiene
-	 * @return
+	 * @return true si se tiene la llave, false si no se tiene
 	 */
 	public boolean hasLlave() {
 		// (00001000 en binario) para leer el 4to bit
@@ -230,8 +229,7 @@ public class Nodo implements Comparable<Nodo> {
 	}
 
 	/**
-	 * Establece el estado de la llave (true si se tiene, false si no)
-	 * @param llave
+	 * @param llave true para indicar que se tiene la llave, false para indicar que no se tiene
 	 */
 	public void setLlave(boolean llave) {
 		if (llave) flags |= 0x08;	  // Enciende el bit
@@ -239,7 +237,7 @@ public class Nodo implements Comparable<Nodo> {
 	}
 
 	/**
-	 * Devuelve 0 si no está volando, o un valor entre 1 y 4 indicando la dirección de vuelo
+	 * @return 0 si no está volando, o un valor entre 1 y 4 indicando la dirección de vuelo
 	 * 1 = norte, 2 = sur, 3 = este, 4 = oeste 
 	 */
 	public byte isVolando() {
@@ -247,7 +245,7 @@ public class Nodo implements Comparable<Nodo> {
 	}
 
 	/**
-	 * Establece la dirección de vuelo (0 para no volando, 1 norte, 2 sur, 3 este, 4 oeste)
+	 * @param direccion Establece la dirección de vuelo (0 para no volando, 1 norte, 2 sur, 3 este, 4 oeste)
 	 */
 	public void setVolando(int direccion) {
 		if (direccion < 0 || direccion > 4) {
@@ -261,7 +259,7 @@ public class Nodo implements Comparable<Nodo> {
 
 	/**
 	 * Establece el estado de vuelo según el tipo de catapulta (1 norte, 2 sur, 3 este, 4 oeste)
-	 * @param tipoCatapulta
+	 * @param tipoCatapulta El tipo de catapulta
 	 */
 	public void setVolandoCat(int tipoCatapulta) {
 		if (tipoCatapulta == CATSOUTH) setVolando(DIRSOUTH);
@@ -272,7 +270,7 @@ public class Nodo implements Comparable<Nodo> {
 
 	/**
 	 * Devuelve true si la catapulta con el ID dado ha sido activada, false si no
-	 * @param id
+	 * @param id El ID de la catapulta
 	 * @return
 	 */
 	private boolean isMonedaRecogida(int id) {
@@ -287,7 +285,7 @@ public class Nodo implements Comparable<Nodo> {
 
 	/**
 	 * Marca la moneda con el ID dado como recogida en el nodo actual
-	 * @param id
+	 * @param id El ID de la moneda
 	 */
 	private void marcarMonedaRecogida(int id) {
 		if (id < 0 || id >= 128) return;
@@ -301,8 +299,8 @@ public class Nodo implements Comparable<Nodo> {
 
 	/**
 	 * Devuelve true si la catapulta con el ID dado ha sido activada, false si no
-	 * @param id
-	 * @return
+	 * @param id El ID de la catapulta
+	 * @return true si la catapulta con el ID dado ha sido activada, false si no
 	 */
 	 private boolean isCatapultaActivada(int id) {
 		if (id < 0 || id >= 128) return true; // ID fuera de rango
@@ -316,7 +314,7 @@ public class Nodo implements Comparable<Nodo> {
 
 	/**
 	 * Marca la catapulta con el ID dado como activada en el nodo actual
-	 * @param id
+	 * @param id El ID de la catapulta
 	 */
 	private void marcarCatapultaActivada(int id) {
 		if (id < 0 || id >= 128) return;
@@ -329,11 +327,10 @@ public class Nodo implements Comparable<Nodo> {
 	}
 
 	/**
-	 * Devuelve true si la posición (x,y) está fuera de los límites del mapa, false si está dentro
-	 * @param x
-	 * @param y
-	 * @param mapa
-	 * @return
+	 * @param x Coordenada X a verificar
+	 * @param y Coordenada Y a verificar
+	 * @param mapa Mapa que se utiliza para determinar los límites (xmax, ymax)
+	 * @return true si la posición (x,y) está fuera de los límites del mapa, false si está dentro
 	 */
 	private boolean outOfBounds(int x, int y, Mapa mapa) {
 		return x < 0 || x >= mapa.xmax || y < 0 || y >= mapa.ymax;
@@ -343,9 +340,8 @@ public class Nodo implements Comparable<Nodo> {
 	// --- OPERACIONES ---
 
 	/**
-	 * Devuelve true si el nodo se considera muerto (ha perdido todas las monedas o ha caído al agua sin estar volando), false si no
-	 * @param mapa
-	 * @return
+	 * @param mapa Mapa que se utiliza para determinar el tipo de casilla actual y si el nodo ha caído al agua sin estar volando
+	 * @return true si el nodo está muerto (ha perdido más monedas de las que tenía o ha caído al agua sin estar volando), false en caso contrario
 	 */
 	public boolean estaMuerto(Mapa mapa) {
 		if (isVolando() == 0 && getCasilla(mapa) == AGUA)
@@ -354,30 +350,28 @@ public class Nodo implements Comparable<Nodo> {
 	}
 
 	/**
-	 * Devuelve el tipo de casilla en la que se encuentra el nodo según el mapa dado (PARED, AGUA, PUERTA, VACIO, etc.)
-	 * @param mapa
-	 * @return
+	 * @param mapa Mapa que se utiliza para determinar el tipo de casilla en la posición actual del nodo
+	 * @return El tipo de casilla en la posición actual del nodo según el mapa (PARED, AGUA, PUERTA, etc.)
 	 */
 	public int getCasilla(Mapa mapa) {
 		return mapa.grid[y][x];
 	}
 
 	/**
-	 * Da la acción que se tomó para llegar a este nodo desde su padre. O null si es el nodo raíz.
-	 * @return
+	 * @return La acción que se tomó para llegar a este nodo desde su padre null para el nodo raíz
 	 */
 	public ACTIONS getAccionPadre() {
 		return accionPrecedente;
 	}
 
 	/**
-	 * Devuelve el nodo padre del nodo actual.
-	 * @return
+	 * @return El nodo padre desde el cual se llegó a este nodo null para el nodo raíz
 	 */
 	public Nodo getPadre() {
 		return padre;
 	}
 
+	// DEPURACION
 	@Override
 	public String toString() {
 		String nodo = String.format("Nodo(x=%d, y=%d, moneda=%d, llave=%b, volando=%d, AccionPadre=%s)", 
@@ -399,17 +393,22 @@ public class Nodo implements Comparable<Nodo> {
 			   this.catapultas2 == otro.catapultas2;
 	}
 
+	// PARA USAR HASHMAP O HASHSET DE NODOS
 	@Override
 	public int hashCode() {
 		return Objects.hash(x, y, flags, monedas1, monedas2, catapultas1, catapultas2);
 	}
 
+	/**
+	 * @param mapa Mapa que se utiliza para determinar la posición del portal/meta
+	 * @return true si el nodo actual está en la posición del portal/meta según el mapa, false en caso contrario
+	 */
 	public boolean esMeta(Mapa mapa) {
 		return this.x == mapa.portalX && this.y == mapa.portalY;
 	}
 
 	// FUNCIONES PARA ALGORITMOS INFORMADOS
-
+	// El orden de comparación es: menor f(n), luego menor h(n) y finalmente el nodo más antiguo (menor ID)
 	@Override
     public int compareTo(Nodo otro) {
         //  menor f(n)

@@ -34,8 +34,6 @@ public class AgenteProfundidad extends AbstractPlayer {
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		if (plan == null) {
-			MetricsProvider.getInstance().setNumAccionesPlan(-1);
-
 			HashSet<Nodo> visitados = new HashSet<>();
 			long inicio = System.nanoTime();
 			Nodo meta = DFSRecursivo(nodoActual, visitados);
@@ -46,14 +44,13 @@ public class AgenteProfundidad extends AbstractPlayer {
 				imprimirMetricas();
 			}
 			else {
-				System.out.println("No se ha encontrado un plan");
 				plan = new ArrayList<>();
 				plan.add(ACTIONS.ACTION_NIL);
 			}
 		}
 		if (plan.size() > 0) {
 			ACTIONS accion = plan.remove(0);
-			System.out.println("Accion: " + accion);
+			//System.out.println("Accion: " + accion);
 			return accion;
 		}
 		
@@ -71,6 +68,7 @@ public class AgenteProfundidad extends AbstractPlayer {
 		ArrayList<Nodo> hijos = actual.expandir(mapa);
 		nodosExpandidos++;
 		for (Nodo hijo : hijos) {
+			hijo.g = actual.g + 1;
 			if (!visitados.contains(hijo)) {
 				if (hijo.g > profundidadMaxima)
 					profundidadMaxima = hijo.g;

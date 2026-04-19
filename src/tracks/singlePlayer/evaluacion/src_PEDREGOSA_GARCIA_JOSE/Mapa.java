@@ -33,6 +33,11 @@ public class Mapa {
 	// Para algoritmos informados
 	public int mapaHeuristico[][];
 
+	/**
+	 * Constructor de la clase Mapa, se encarga de generar el mapa a partir del estado de observación del juego
+	 * @param stateObs El estado de observación del juego, se utiliza para generar el mapa con la información de las casillas,
+	 * la posición del personaje, la posición del portal, etc
+	*/
 	public Mapa(StateObservation stateObs) {
 		ArrayList<Observation>[][] obsGrid = stateObs.getObservationGrid();
 		this.ymax = obsGrid.length;
@@ -161,6 +166,7 @@ public class Mapa {
 		//System.out.println(this);
 	}
 
+	// Constructor para mapa vacio (creo que no se usa, pero por si acaso)
 	public Mapa(int ymax, int xmax) {
 		this.ymax = ymax;
 		this.xmax = xmax;
@@ -171,6 +177,7 @@ public class Mapa {
 		mapaCatapultas = new byte[ymax][xmax];
 	}
 
+	// Método para copiar el mapa de forma eficiente
 	public Mapa copy(Mapa other)
 	{
 		if (this != other)
@@ -256,8 +263,11 @@ public class Mapa {
 
 	/**
 	 * Calcula la distancia Manhattan entre una casilla y otra
-	 * @param otro
-	 * @return
+	 * @param x1 Coordenada X de la primera casilla
+	 * @param y1 Coordenada Y de la primera casilla
+	 * @param x2 Coordenada X de la segunda casilla
+	 * @param y2 Coordenada Y de la segunda casilla
+	 * @return La distancia Manhattan entre las dos casillas
 	 */
 	public int distanciaManhattan(int x1, int y1, int x2, int y2) {
 		return Math.abs(x1 - x2) + Math.abs(y1 - y2);
@@ -266,9 +276,9 @@ public class Mapa {
 	/**
 	 * Devuelve la heurística de una casilla dada,
 	 * se calcula con la distancia Manhattan entre la casilla y el portal, ignorando obstáculos
-	 * @param x
-	 * @param y
-	 * @return
+	 * @param x Coordenada X de la casilla
+	 * @param y Coordenada Y de la casilla
+	 * @return La heurística de la casilla
 	 */
 	public int H(int x, int y) {
 		return mapaHeuristico[y][x];
